@@ -8,6 +8,7 @@ $(function() {
 
   let localStream;
   let room;
+  var peerIdArray;
   peer.on('open', () => {
     $('#my-id').text(peer.id);
     // Get things started
@@ -87,6 +88,8 @@ $(function() {
     });
 
   function step1() {
+    // init peerIdArray
+    peerIdArray = new Array(6);
     // Get audio/video stream
     const audioSource = $('#audioSource').val();
     const videoSource = $('#videoSource').val();
@@ -123,7 +126,15 @@ $(function() {
       const peerId = stream.peerId;
       const id = 'video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '');
 
-      $('#their-videos').append($(
+      let cellId;
+      for (var i = 0; i < peerIdArray.length; i++) {
+        if(peerIdArray[i] === null || peerIdArray[i] === undefined){
+          cellId = i;
+          peerIdArray[i] = peerId;
+          break;
+        }
+      }
+      $('#their-videos' + cellId).append($(
         '<div class="video_' + peerId +'" id="' + id + '">' +
           '<label>' + stream.peerId + ':' + stream.id + '</label>' +
           '<video class="remoteVideos">' +
@@ -135,6 +146,11 @@ $(function() {
 
     room.on('removeStream', stream => {
       const peerId = stream.peerId;
+      for (var i = 0; i < peerIdArray.length; i++) {
+        if(peerIdArray[i] === peerId){
+          peerIdArray[i] = null;
+        }
+      }
       $('#video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '')).remove();
     });
 
